@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">App Syng Task App</string>
+    <string name="facebook_app_id">180717497111454</string>
+    <string name="fb_login_protocol_scheme">fb180717497111454</string>
+</resources>
