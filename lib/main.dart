@@ -4,6 +4,7 @@ import 'package:app_syng_task/pages/LoginScreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 
@@ -32,13 +33,24 @@ class CheckLogin extends StatelessWidget {
           final FirebaseFirestore _firestore = FirebaseFirestore.instance;
           DocumentReference ref = _firestore.collection('Users').doc(userId);
 
+
           ref.get().then((value){
 
-            String UserId = value.data()["U"];
-            String UserName = value.data()["N"];
+            if(value.exists){
 
-            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=> ChatScreen(UserId , UserName)), (route) => false);
 
+              String UserId = value.data()["U"];
+              String UserName = value.data()["N"];
+
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=> ChatScreen(UserId , UserName)), (route) => false);
+
+
+
+            }else{
+
+              FirebaseAuth.instance.signOut();
+
+            }
 
 
           });

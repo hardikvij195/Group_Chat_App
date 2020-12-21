@@ -29,8 +29,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           scrollDirection: Axis.vertical,
           children: [
             SizedBox(height: 50,),
-            Text("Group Chat App" , style: TextStyle(fontSize: 25 , color: Colors.indigo , fontWeight: FontWeight.bold), textAlign: TextAlign.center,),
-            SizedBox(height: 100,),
+            Text("AppSynergies\n\nGroup Chat App" , style: TextStyle(fontSize: 25 , color: Colors.indigo , fontWeight: FontWeight.bold), textAlign: TextAlign.center,),
+            SizedBox(height: 50,),
             Text("Sign Up" , style: TextStyle(fontSize: 20, color: Colors.indigo , fontWeight: FontWeight.bold), textAlign: TextAlign.center,),
             SizedBox(height: 10,),
             TextFieldWidget("Name", textEditingController1),
@@ -125,7 +125,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                   "N": textEditingController1.text.trim(),
                   "U": user.uid,
-                  "E" : textEditingController2.text.trim()
+                  "E" : textEditingController2.text.trim(),
+                  "T": "E"
+
 
                 }).then((value){
 

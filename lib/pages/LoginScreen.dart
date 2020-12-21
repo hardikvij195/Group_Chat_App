@@ -1,5 +1,6 @@
 import 'package:app_syng_task/Widgets/FbButton.dart';
 import 'package:app_syng_task/Widgets/ProgressButton.dart';
+import 'package:app_syng_task/main.dart';
 import 'package:app_syng_task/pages/SignUpScreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,7 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController textEditingController2 = new TextEditingController();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  String name = '', image;
+  String name = '', email = '';
 
   static final FacebookLogin facebookSignIn = new FacebookLogin();
   final db = FirebaseFirestore.instance;
@@ -44,33 +45,54 @@ class _LoginScreenState extends State<LoginScreen> {
               child: FacebookSignInButton(onPressed: () async {
 
                 final FacebookLoginResult result = await facebookSignIn.logIn(['email']);
-
                 switch (result.status) {
                   case FacebookLoginStatus.loggedIn:
                     final FacebookAccessToken accessToken = result.accessToken;
+                    print(result.accessToken.toString());
                     final graphResponse = await http.get('https://graph.facebook.com/v2.12/me?fields=first_name,picture&access_token=${accessToken.token}');
                     final profile = jsonDecode(graphResponse.body);
                     print(profile);
                     setState(() {
+                      print("profile -- " + profile.toString());
                       name = profile['first_name'];
+                      email = profile['email'];
                       //image = profile['picture']['data']['url'];
                     });
 
-                    db.collection("Users").doc(accessToken.userId).set({
+                    AuthCredential credential = FacebookAuthProvider.credential(accessToken.token);
+                    FirebaseAuth.instance.signInWithCredential(credential).then((value) {
 
-                      "N": name,
-                      "U": accessToken.userId,
-                      "E" :profile['email']
+                      print("Fb Login -- " + value.toString());
+                      print("Name - " + value.additionalUserInfo.profile['first_name']);
+                      print("Email - " + value.additionalUserInfo.profile['email']);
+                      print("Uid - " +value.user.uid );
 
-                    }).then((value){
+                      db.collection("Users").doc(value.user.uid).set({
 
-                      Toast.show("Profile Created ", context);
+                        "N": value.additionalUserInfo.profile['first_name'],
+                        "U": value.user.uid,
+                        "E" :value.additionalUserInfo.profile['email'],
 
-                      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=> ChatScreen(accessToken.userId , name)), (route) => false);
+                      }).then((value){
 
+                        Toast.show("Profile Created ", context);
+
+                        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=> ChatScreen(accessToken.userId , name)), (route) => false);
+
+
+
+                      });
 
 
                     });
+
+                    // FirebaseAuth.instance.signInWithCustomToken(accessToken.token).then((value) {
+                    //
+                    //   print("Fb Sign In -- " + value.toString());
+                    //
+                    // });
+
+
 
          //            print('''
          // Logged in!
@@ -189,11 +211,66 @@ class _LoginScreenState extends State<LoginScreen> {
             stateTextWithIcon = ButtonState.loading ;
           });
 
-
-
           try {
 
-            dynamic result = await _auth.signInWithEmailAndPassword(email: textEditingController1.text.trim() , password: textEditingController2.text);
+            dynamic result = await _auth.signInWithEmailAndPassword(email: textEditingController1.text.trim() , password: textEditingController2.text).whenComplete(() {
+
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=> CheckLogin()), (route) => false);
+
+            });
+
+            // if(result == null) {
+            //
+            //   Toast.show("Email Id not found", context);
+            //
+            //
+            // }else{
+            //
+            //   String userId = result.toString() ;
+            //
+            //   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+            //   DocumentReference ref = _firestore.collection('Users').doc(userId);
+            //
+            //   ref.get().then((value){
+            //
+            //     String UserId = value.data()["U"];
+            //     String UserName = value.data()["N"];
+            //
+            //     Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=> ChatScreen(UserId , UserName)), (route) => false);
+            //
+            //
+            //
+            //   });
+            //
+            //   //String re = result.toString();
+            //   //print('Uid =====> $re');
+            //
+            //   // final FirebaseAuth _auth = FirebaseAuth.instance;
+            //   // User user = await _auth.currentUser;
+            //   //
+            //   //
+            //   // if(user != null){
+            //   //
+            //   //   db.collection("Users").doc(user.uid).set({
+            //   //
+            //   //     "N": textEditingController1.text.trim(),
+            //   //     "U": user.uid,
+            //   //     "E" : textEditingController2.text.trim()
+            //   //
+            //   //   }).then((value){
+            //   //
+            //   //     Toast.show("Profile Created ", context);
+            //   //
+            //   //
+            //   //     Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=> ChatScreen(user.uid , textEditingController1.text.trim())), (route) => false);
+            //   //
+            //   //
+            //   //
+            //   //   });
+            //   //
+            //   // }
+            // }
+
 
             print(" V --- " + result.toString());
 
